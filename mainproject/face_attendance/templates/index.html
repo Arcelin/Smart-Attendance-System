@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Smart Drishti{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-md-12 text-center mb-4">
+        <h1 class="display-4"><i class="fas fa-camera me-3" style="color: var(--lavender-primary);"></i>Smart Drishti</h1>
+        <p class="lead">A simple attendance system using face detection technology</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-user-graduate fa-4x mb-3" style="color: var(--lavender-primary);"></i>
+                <h3 class="card-title">Student Management</h3>
+                <p class="card-text">Add and manage student profiles with face images for attendance recognition.</p>
+                <a href="/students" class="btn btn-primary mt-3">
+                    <i class="fas fa-users me-2"></i>Manage Students
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-camera fa-4x mb-3" style="color: var(--lavender-primary);"></i>
+                <h3 class="card-title">Take Attendance</h3>
+                <p class="card-text">Start the webcam and capture attendance in real-time using face detection.</p>
+                <a href="/take_attendance" class="btn btn-primary mt-3">
+                    <i class="fas fa-camera me-2"></i>Take Attendance
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-pie fa-4x mb-3" style="color: var(--lavender-primary);"></i>
+                <h3 class="card-title">View Reports</h3>
+                <p class="card-text">Access attendance records and generate reports for classes and dates.</p>
+                <a href="/view_attendance" class="btn btn-primary mt-3">
+                    <i class="fas fa-list-alt me-2"></i>View Attendance
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

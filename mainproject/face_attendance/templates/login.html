@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Face Attendance System</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <style>
+        :root {
+            --lavender-primary: #8e7cc3;
+            --lavender-light: #e6e1f9;
+            --lavender-dark: #654ea3;
+            --lavender-accent: #b19cd9;
+            --lavender-hover: #d9c8f0;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--lavender-light), #f8f9fa);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-box {
+            max-width: 400px;
+            width: 100%;
+            padding: 2rem;
+            background-color: white;
+            box-shadow: 0 4px 15px rgba(101, 78, 163, 0.15);
+            border-radius: 0.5rem;
+            border-top: 5px solid var(--lavender-primary);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .logo i {
+            font-size: 3rem;
+            color: var(--lavender-primary);
+        }
+        .logo h3 {
+            color: var(--lavender-dark);
+        }
+        .btn-primary {
+            background-color: var(--lavender-primary);
+            border-color: var(--lavender-primary);
+        }
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: var(--lavender-dark);
+            border-color: var(--lavender-dark);
+        }
+        .input-group-text {
+            background-color: var(--lavender-light);
+            color: var(--lavender-dark);
+            border-color: #ced4da;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <div class="logo">
+            <i class="fas fa-user-check"></i>
+            <h3 class="mt-3">Face Attendance System</h3>
+            <p class="text-muted">Please login to continue</p>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show mb-3">
+            <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'danger' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    <input type="text" class="form-control" id="username" name="username" required autofocus>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+            </div>
+            
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </button>
+            </div>
+        </form>
+        
+        <div class="text-center mt-4">
+            <small class="text-muted">© Face Attendance System {{ now.year }}</small>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

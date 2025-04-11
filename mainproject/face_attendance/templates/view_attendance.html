@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+
+{% block title %}View Attendance - Smart Drishti{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="fas fa-list-alt me-2"></i>View Attendance</h2>
+        <p class="text-muted">View and analyze all attendance records</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="/take_attendance" class="btn btn-primary">
+            <i class="fas fa-camera me-2"></i>Take New Attendance
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-search me-2"></i>Search Records</h5>
+            </div>
+            <div class="card-body">
+                <form action="/attendance_report" method="POST">
+                    <div class="mb-3">
+                        <label for="class_id" class="form-label">Select Class</label>
+                        <select class="form-select" id="class_id" name="class_id" required>
+                            <option value="" selected disabled>Choose a class...</option>
+                            {% for class in classes %}
+                            <option value="{{ class.id }}">{{ class.name }} ({{ class.department }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="subject_type" class="form-label">Select Subject Type</label>
+                        <select class="form-select" id="subject_type" name="subject_type" required>
+                            <option value="" selected disabled>Choose subject type...</option>
+                            <option value="main">Main Subject</option>
+                            <option value="elective">Elective Subject</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="main_subject_div" style="display: none;">
+                        <label for="subject_id" class="form-label">Select Main Subject</label>
+                        <select class="form-select" id="main_subject_id" name="subject_id">
+                            <option value="" selected disabled>Choose main subject...</option>
+                            {% for subject in main_subjects %}
+                            <option value="{{ subject.id }}" data-class="{{ subject.class_id }}">{{ subject.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="elective_subject_div" style="display: none;">
+                        <label for="subject_id" class="form-label">Select Elective Subject</label>
+                        <select class="form-select" id="elective_subject_id" name="subject_id">
+                            <option value="" selected disabled>Choose elective subject...</option>
+                            {% for subject in elective_subjects %}
+                            <option value="{{ subject.id }}" data-class="{{ subject.class_id }}">{{ subject.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Select Date</label>
+                        <select class="form-select" id="date" name="date" required>
+                            <option value="" selected disabled>Choose a date...</option>
+                            {% for record in dates %}
+                            <option value="{{ record.date.strftime('%Y-%m-%d') }}">{{ record.date.strftime('%d-%m-%Y') }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>View Report
+                        </button>
+                    </div>
+                </form>
+                
+                <hr>
+                
+                <div class="d-grid gap-2">
+                    <a href="/take_attendance" class="btn btn-outline-success">
+                        <i class="fas fa-camera me-2"></i>Take New Attendance
+                    </a>
+                    <a href="/" class="btn btn-outline-secondary">
+                        <i class="fas fa-home me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Recent Attendance Records</h5>
+            </div>
+            <div class="card-body">
+                {% if dates %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in dates %}
+                            <tr>
+                                <td>{{ record.date.strftime('%d-%m-%Y') }}</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton{{ loop.index }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Select Class
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ loop.index }}">
+                                            {% for class in classes %}
+                                            <li>
+                                                <form action="/attendance_report" method="POST" style="display: inline;">
+                                                    <input type="hidden" name="class_id" value="{{ class.id }}">
+                                                    <input type="hidden" name="date" value="{{ record.date.strftime('%Y-%m-%d') }}">
+                                                    <button type="submit" class="dropdown-item">
+                                                        {{ class.name }}
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                    <p class="lead text-muted">No attendance records found</p>
+                    <a href="/take_attendance" class="btn btn-primary mt-2">
+                        <i class="fas fa-camera me-2"></i>Take Attendance
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>How to Use</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="alert alert-light border">
+                            <h5 class="alert-heading"><i class="fas fa-search me-2"></i>Search for Attendance Records</h5>
+                            <ol class="mb-0">
+                                <li>Use the search panel on the left to view specific reports</li>
+                                <li>Select a class and date to generate the report</li>
+                                <li>Click "View Report" to see detailed attendance</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="alert alert-light border">
+                            <h5 class="alert-heading"><i class="fas fa-table me-2"></i>Recent Records</h5>
+                            <ol class="mb-0">
+                                <li>The table shows recent attendance dates</li>
+                                <li>Click "Select Class" to see attendance for a specific class</li>
+                                <li>Print or export reports as needed</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const subjectType = document.getElementById('subject_type');
+        const mainSubjectDiv = document.getElementById('main_subject_div');
+        const electiveSubjectDiv = document.getElementById('elective_subject_div');
+        const classSelect = document.getElementById('class_id');
+        const mainSubjectSelect = document.getElementById('main_subject_id');
+        const electiveSubjectSelect = document.getElementById('elective_subject_id');
+        
+        // Handle subject type selection
+        subjectType.addEventListener('change', function() {
+            const selectedType = this.value;
+            
+            if (selectedType === 'main') {
+                mainSubjectDiv.style.display = 'block';
+                electiveSubjectDiv.style.display = 'none';
+                
+                // Filter main subjects based on selected class
+                filterSubjectsByClass(classSelect.value, mainSubjectSelect);
+            } else if (selectedType === 'elective') {
+                mainSubjectDiv.style.display = 'none';
+                electiveSubjectDiv.style.display = 'block';
+                
+                // Filter elective subjects based on selected class
+                filterSubjectsByClass(classSelect.value, electiveSubjectSelect);
+            } else {
+                mainSubjectDiv.style.display = 'none';
+                electiveSubjectDiv.style.display = 'none';
+            }
+        });
+        
+        // Handle class selection
+        classSelect.addEventListener('change', function() {
+            const classId = this.value;
+            const selectedType = subjectType.value;
+            
+            if (selectedType === 'main') {
+                filterSubjectsByClass(classId, mainSubjectSelect);
+            } else if (selectedType === 'elective') {
+                filterSubjectsByClass(classId, electiveSubjectSelect);
+            }
+        });
+        
+        // Function to filter subjects by class
+        function filterSubjectsByClass(classId, subjectSelect) {
+            const options = subjectSelect.querySelectorAll('option');
+            
+            // Reset first
+            for (let i = 0; i < options.length; i++) {
+                options[i].style.display = 'none';
+            }
+            
+            // Show first disabled option
+            options[0].style.display = '';
+            
+            // Show options matching the selected class
+            for (let i = 1; i < options.length; i++) {
+                if (options[i].dataset.class === classId) {
+                    options[i].style.display = '';
+                }
+            }
+            
+            // Reset selection
+            subjectSelect.value = '';
+        }
+    });
+</script>
+{% endblock %} 

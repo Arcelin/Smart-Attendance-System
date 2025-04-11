@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Subjects - Smart Drishti{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="fas fa-book me-2"></i>Subject Management</h2>
+        <p class="text-muted">View main and elective subjects for each class</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Main Subjects</h5>
+            </div>
+            <div class="card-body">
+                {% if main_subjects %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Subject Name</th>
+                                <th>Class</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subject in main_subjects %}
+                            <tr>
+                                <td>{{ subject.id }}</td>
+                                <td>{{ subject.name }}</td>
+                                <td>{{ subject.class_name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <p class="lead text-muted">No main subjects found</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-list-alt me-2"></i>Elective Subjects</h5>
+            </div>
+            <div class="card-body">
+                {% if elective_subjects %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Subject Name</th>
+                                <th>Class</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subject in elective_subjects %}
+                            <tr>
+                                <td>{{ subject.id }}</td>
+                                <td>{{ subject.name }}</td>
+                                <td>{{ subject.class_name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <p class="lead text-muted">No elective subjects found</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="alert alert-info">
+            <h5><i class="fas fa-info-circle me-2"></i>Subject Information</h5>
+            <p class="mb-0">
+                <strong>Main Subjects:</strong> All students in a class must take these mandatory subjects.<br>
+                <strong>Elective Subjects:</strong> Students can choose one elective subject based on their interests.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %} 

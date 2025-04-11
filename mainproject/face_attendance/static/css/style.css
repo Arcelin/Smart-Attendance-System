@@ -1,0 +1,155 @@
+/* 
+   Face Attendance System - Custom CSS
+   Lavender Theme
+*/
+
+:root {
+    --lavender-primary: #8e7cc3;
+    --lavender-light: #e6e1f9;
+    --lavender-dark: #654ea3;
+    --lavender-accent: #b19cd9;
+    --lavender-hover: #d9c8f0;
+}
+
+body {
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+    background-color: #f8f9fa;
+    background: linear-gradient(to right, var(--lavender-light), #f8f9fa);
+}
+
+/* Navbar customization */
+.navbar {
+    background-color: var(--lavender-primary) !important;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: white !important;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Card customization */
+.card {
+    border-radius: 0.5rem;
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    border-top-left-radius: 0.5rem !important;
+    border-top-right-radius: 0.5rem !important;
+    background-color: var(--lavender-light) !important;
+    color: var(--lavender-dark);
+}
+
+/* Button styling */
+.btn-primary {
+    background-color: var(--lavender-primary) !important;
+    border-color: var(--lavender-primary) !important;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--lavender-dark) !important;
+    border-color: var(--lavender-dark) !important;
+}
+
+.btn {
+    border-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+}
+
+/* Form control styling */
+.form-control, .form-select {
+    border-radius: 0.25rem;
+    border: 1px solid #ced4da;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--lavender-accent);
+    box-shadow: 0 0 0 0.2rem rgba(177, 156, 217, 0.25);
+}
+
+/* Badge styling */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+.badge-primary {
+    background-color: var(--lavender-primary) !important;
+}
+
+/* Image preview */
+#imagePreview img {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 2px solid #fff;
+}
+
+/* Table customization */
+.table th {
+    font-weight: 600;
+    color: var(--lavender-dark);
+    background-color: var(--lavender-light);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(142, 124, 195, 0.05);
+}
+
+/* Custom animations */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Print styles */
+@media print {
+    .navbar, .btn, .no-print {
+        display: none !important;
+    }
+    
+    .container {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .card {
+        border: 1px solid #ddd;
+        box-shadow: none !important;
+    }
+    
+    .card-header {
+        background-color: #f8f9fa !important;
+        color: #333 !important;
+    }
+    
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .table th, .table td {
+        padding: 8px;
+        border: 1px solid #ddd;
+    }
+} 

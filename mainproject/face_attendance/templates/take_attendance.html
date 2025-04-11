@@ -1,0 +1,484 @@
+{% extends 'base.html' %}
+
+{% block title %}Take Attendance - Smart Drishti{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="fas fa-camera me-2"></i>Take Attendance</h2>
+        <p class="text-muted">Take attendance by detecting faces through webcam</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="/" class="btn btn-outline-secondary">
+            <i class="fas fa-home me-2"></i>Back to Home
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Attendance Settings</h5>
+            </div>
+            <div class="card-body">
+                <form id="attendanceForm" action="/process_attendance" method="POST">
+                    <div class="mb-3">
+                        <label for="class_id" class="form-label">Select Class <span class="text-danger">*</span></label>
+                        <select class="form-select" id="class_id" required>
+                            <option value="" selected disabled>Choose a class</option>
+                            {% for class in classes %}
+                            <option value="{{ class.id }}">{{ class.name }} ({{ class.department }})</option>
+                            {% endfor %}
+                        </select>
+                        <input type="hidden" id="hidden_class_id" name="class_id" value="">
+                    </div>
+                    
+                    <div class="mb-3" id="subject_selection" style="display: none;">
+                        <label for="subject_type" class="form-label">Subject Type <span class="text-danger">*</span></label>
+                        <select class="form-select" id="subject_type" name="subject_type" required>
+                            <option value="" selected disabled>Choose subject type</option>
+                            <option value="main">Main Subject</option>
+                            <option value="elective">Elective Subject</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="main_subject_div" style="display: none;">
+                        <label for="main_subject_id" class="form-label">Main Subject <span class="text-danger">*</span></label>
+                        <select class="form-select" id="main_subject_id" name="main_subject_id">
+                            <option value="" selected disabled>Choose main subject</option>
+                        </select>
+                        <input type="hidden" id="hidden_subject_id" name="subject_id" value="">
+                    </div>
+                    
+                    <div class="mb-3" id="elective_subject_div" style="display: none;">
+                        <label for="elective_subject_id" class="form-label">Elective Subject <span class="text-danger">*</span></label>
+                        <select class="form-select" id="elective_subject_id" name="elective_subject_id">
+                            <option value="" selected disabled>Choose elective subject</option>
+                        </select>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>How it works:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Select the class for attendance</li>
+                            <li>Choose webcam or group photo upload</li>
+                            <li>Students with detected faces will be marked present</li>
+                            <li>Click "Submit Attendance" when done</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="button" id="startCamera" class="btn btn-success">
+                            <i class="fas fa-video me-2"></i>Start Camera
+                        </button>
+                        <button type="submit" id="submitAttendance" class="btn btn-primary" disabled>
+                            <i class="fas fa-save me-2"></i>Submit Attendance
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-users me-2"></i>Group Photo Upload</h5>
+            </div>
+            <div class="card-body">
+                <form id="groupPhotoForm" action="/process_group_attendance" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" id="group_class_id" name="class_id" value="">
+                    <input type="hidden" id="group_subject_id" name="subject_id" value="">
+                    <input type="hidden" id="group_subject_type" name="subject_type" value="">
+                    
+                    <div class="mb-3">
+                        <label for="group_photo" class="form-label">Upload Group Photo <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="group_photo" name="group_photo" accept="image/*" required>
+                        <div class="form-text">Upload a clear group photo showing students' faces</div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Important:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Make sure all students are clearly visible in the photo</li>
+                            <li>Good lighting is essential for face detection</li>
+                            <li>First select class and subject above before uploading</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" id="submitGroupPhoto" class="btn btn-info" disabled>
+                            <i class="fas fa-upload me-2"></i>Upload & Process Group Photo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-camera me-2"></i>Webcam Feed</h5>
+            </div>
+            <div class="card-body text-center">
+                <div id="cameraPlaceholder" class="py-5">
+                    <i class="fas fa-camera fa-4x text-muted mb-3"></i>
+                    <p class="lead text-muted">Select a class and click "Start Camera" to begin</p>
+                </div>
+                
+                <div id="cameraContainer" style="display: none;">
+                    <div class="alert alert-success mb-3">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span>Camera is active. Faces are being detected...</span>
+                    </div>
+                    <div id="unregisteredAlert" class="alert alert-warning mb-3" style="display: none;">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span>Unregistered face detected! Please register the student first.</span>
+                        <a href="/add_student" class="btn btn-sm btn-primary ms-2">Register Student</a>
+                    </div>
+                    <img id="videoFeed" class="img-fluid border rounded" style="max-height: 400px;" alt="Webcam Feed">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const startCameraBtn = document.getElementById('startCamera');
+        const submitAttendanceBtn = document.getElementById('submitAttendance');
+        const classSelect = document.getElementById('class_id');
+        const hiddenClassId = document.getElementById('hidden_class_id');
+        const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+        const cameraContainer = document.getElementById('cameraContainer');
+        const videoFeed = document.getElementById('videoFeed');
+        const subjectSelection = document.getElementById('subject_selection');
+        const subjectType = document.getElementById('subject_type');
+        const mainSubjectDiv = document.getElementById('main_subject_div');
+        const electiveSubjectDiv = document.getElementById('elective_subject_div');
+        const mainSubjectSelect = document.getElementById('main_subject_id');
+        const electiveSubjectSelect = document.getElementById('elective_subject_id');
+        const hiddenSubjectId = document.getElementById('hidden_subject_id');
+        
+        // Main and elective subjects data
+        const mainSubjects = {
+            {% for class in classes %}
+            "{{ class.id }}": [
+                {% for subject in main_subjects %}
+                {% if subject.class_id == class.id %}
+                { id: "{{ subject.id }}", name: "{{ subject.name }}" },
+                {% endif %}
+                {% endfor %}
+            ],
+            {% endfor %}
+        };
+        
+        const electiveSubjects = {
+            {% for class in classes %}
+            "{{ class.id }}": [
+                {% for subject in elective_subjects %}
+                {% if subject.class_id == class.id %}
+                { id: "{{ subject.id }}", name: "{{ subject.name }}" },
+                {% endif %}
+                {% endfor %}
+            ],
+            {% endfor %}
+        };
+        
+        // Update both forms when class selection changes
+        classSelect.addEventListener('change', function() {
+            const classId = this.value;
+            hiddenClassId.value = classId;
+            document.getElementById('group_class_id').value = classId;
+            
+            if (classId) {
+                // Show subject type selection
+                subjectSelection.style.display = 'block';
+                
+                // Reset subject type
+                subjectType.value = '';
+                mainSubjectDiv.style.display = 'none';
+                electiveSubjectDiv.style.display = 'none';
+                
+                // Clear subject selections
+                mainSubjectSelect.innerHTML = '<option value="" selected disabled>Choose main subject</option>';
+                electiveSubjectSelect.innerHTML = '<option value="" selected disabled>Choose elective subject</option>';
+                
+                // Populate main subjects
+                if (mainSubjects[classId] && mainSubjects[classId].length > 0) {
+                    mainSubjects[classId].forEach(function(subject) {
+                        const option = document.createElement('option');
+                        option.value = subject.id;
+                        option.textContent = subject.name;
+                        mainSubjectSelect.appendChild(option);
+                    });
+                }
+                
+                // Populate elective subjects
+                if (electiveSubjects[classId] && electiveSubjects[classId].length > 0) {
+                    electiveSubjects[classId].forEach(function(subject) {
+                        const option = document.createElement('option');
+                        option.value = subject.id;
+                        option.textContent = subject.name;
+                        electiveSubjectSelect.appendChild(option);
+                    });
+                }
+            } else {
+                subjectSelection.style.display = 'none';
+                mainSubjectDiv.style.display = 'none';
+                electiveSubjectDiv.style.display = 'none';
+            }
+            
+            // Disable group photo upload button if no class selected
+            document.getElementById('submitGroupPhoto').disabled = !classId;
+        });
+        
+        // Update subject selection when subject type changes
+        subjectType.addEventListener('change', function() {
+            const type = this.value;
+            
+            if (type === 'main') {
+                mainSubjectDiv.style.display = 'block';
+                electiveSubjectDiv.style.display = 'none';
+                document.getElementById('group_subject_type').value = 'main';
+            } else if (type === 'elective') {
+                mainSubjectDiv.style.display = 'none';
+                electiveSubjectDiv.style.display = 'block';
+                document.getElementById('group_subject_type').value = 'elective';
+            } else {
+                mainSubjectDiv.style.display = 'none';
+                electiveSubjectDiv.style.display = 'none';
+                document.getElementById('group_subject_type').value = '';
+            }
+        });
+        
+        // Update hidden subject ID when main subject is selected
+        mainSubjectSelect.addEventListener('change', function() {
+            hiddenSubjectId.value = this.value;
+            document.getElementById('group_subject_id').value = this.value;
+        });
+        
+        // Update hidden subject ID when elective subject is selected
+        electiveSubjectSelect.addEventListener('change', function() {
+            hiddenSubjectId.value = this.value;
+            document.getElementById('group_subject_id').value = this.value;
+        });
+        
+        // Start camera button click handler
+        startCameraBtn.addEventListener('click', function() {
+            const classId = classSelect.value;
+            const subjectTypeValue = subjectType.value;
+            let subjectId = '';
+            
+            if (!classId) {
+                alert('Please select a class before starting the camera');
+                return;
+            }
+            
+            if (!subjectTypeValue) {
+                alert('Please select subject type');
+                return;
+            }
+            
+            if (subjectTypeValue === 'main') {
+                subjectId = mainSubjectSelect.value;
+                if (!subjectId) {
+                    alert('Please select a main subject');
+                    return;
+                }
+            } else if (subjectTypeValue === 'elective') {
+                subjectId = electiveSubjectSelect.value;
+                if (!subjectId) {
+                    alert('Please select an elective subject');
+                    return;
+                }
+            }
+            
+            // Update hidden inputs
+            hiddenClassId.value = classId;
+            hiddenSubjectId.value = subjectId;
+            
+            // Set subject in session first
+            fetch(`/set_subject/${classId}/${subjectId}/${subjectTypeValue}`)
+                .then(response => {
+                    console.log('Subject set response:', response);
+                    if (response.ok) {
+                        console.log(`Subject set successfully: ${subjectTypeValue} subject ID ${subjectId}`);
+                        
+                        // Show camera feed and hide placeholder
+                        cameraPlaceholder.style.display = 'none';
+                        cameraContainer.style.display = 'block';
+                        
+                        // Set the video feed source to the webcam stream from our backend
+                        videoFeed.onerror = function() {
+                            console.error('Error loading camera feed. Trying fallback mode...');
+                            
+                            // Show a notification to the user
+                            const cameraAlertDiv = document.createElement('div');
+                            cameraAlertDiv.className = 'alert alert-warning mb-3';
+                            cameraAlertDiv.innerHTML = `
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <span>Camera access failed. Using simulation mode instead. Attendance will still be marked.</span>
+                            `;
+                            
+                            // Add the alert before the video feed
+                            videoFeed.parentNode.insertBefore(cameraAlertDiv, videoFeed);
+                            
+                            // Try the fallback feed instead after a short delay
+                            setTimeout(() => {
+                                videoFeed.src = `/fallback_feed/${classId}?t=${new Date().getTime()}`;
+                            }, 500);
+                        };
+                        
+                        videoFeed.onload = function() {
+                            console.log('Camera feed loaded successfully');
+                        };
+                        
+                        // Use a timestamp to prevent caching and add a retry parameter
+                        videoFeed.src = `/video_feed/${classId}?t=${new Date().getTime()}&retry=true`;
+                        
+                        // Set a timeout to check if video has loaded - if not, use fallback
+                        setTimeout(() => {
+                            if (videoFeed.readyState === 0 || !videoFeed.currentTime) {
+                                console.log("Video feed did not load in time, trying fallback");
+                                videoFeed.src = `/fallback_feed/${classId}?t=${new Date().getTime()}`;
+                            }
+                        }, 10000);  // Wait 10 seconds
+            
+            // Enable the submit button
+            submitAttendanceBtn.disabled = false;
+            
+                        // Disable the selection fields
+            classSelect.disabled = true;
+                        subjectType.disabled = true;
+                        mainSubjectSelect.disabled = true;
+                        electiveSubjectSelect.disabled = true;
+            startCameraBtn.disabled = true;
+                        
+                        // Setup video monitoring for unregistered faces
+                        setupUnregisteredFaceMonitoring();
+                    } else {
+                        alert('Error setting subject. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+        });
+        
+        // Function to monitor video feed for unregistered face messages
+        function setupUnregisteredFaceMonitoring() {
+            const unregisteredAlert = document.getElementById('unregisteredAlert');
+            const videoElement = document.getElementById('videoFeed');
+            const classId = hiddenClassId.value;
+            
+            // First check if the class has students
+            fetch(`/check_class_students/${classId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.has_students) {
+                        // Show warning immediately if no students in class
+                        unregisteredAlert.style.display = 'block';
+                    }
+                    
+                    // Set up monitoring and fallback handling
+                    let frameCount = 0;
+                    let failedFrames = 0;
+                    const maxFailedFrames = 10; // Number of consecutive failures before fallback
+                    
+                    // Monitor video feed
+                    const checkInterval = setInterval(() => {
+                        if (!videoElement || videoElement.src === '' || 
+                            cameraContainer.style.display === 'none') {
+                            clearInterval(checkInterval);
+                            return;
+                        }
+                        
+                        // Check if video has loaded properly
+                        if (videoElement.readyState === 0 || 
+                            (videoElement.currentTime === 0 && frameCount > 5)) {
+                            failedFrames++;
+                            console.log(`Camera not streaming, failed frames: ${failedFrames}`);
+                            
+                            // If camera consistently fails, switch to fallback
+                            if (failedFrames >= maxFailedFrames) {
+                                console.log("Camera failure detected, switching to fallback mode");
+                                videoElement.src = `/fallback_feed/${classId}?t=${new Date().getTime()}`;
+                                
+                                // Add a camera fallback message
+                                const cameraAlertDiv = document.createElement('div');
+                                cameraAlertDiv.className = 'alert alert-warning mb-3';
+                                cameraAlertDiv.innerHTML = `
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <span>Camera access failed. Using simulation mode instead. Attendance will still be marked.</span>
+                                `;
+                                
+                                // Add the alert above the video feed if not already present
+                                if (!document.querySelector('.alert-warning')) {
+                                    videoElement.parentNode.insertBefore(cameraAlertDiv, videoElement);
+                                }
+                                
+                                clearInterval(checkInterval);
+                            }
+                        } else {
+                            // Reset failed frame counter if video is working
+                            failedFrames = 0;
+                            frameCount++;
+                        }
+                    }, 1000); // Check every second
+                })
+                .catch(error => {
+                    console.error('Error checking class students:', error);
+                });
+        }
+        
+        // Form submission handler
+        document.getElementById('attendanceForm').addEventListener('submit', function(e) {
+            // Double-check class_id is set
+            const classIdValue = classSelect.value;
+            if (!classIdValue) {
+                e.preventDefault();
+                alert('Please select a class before submitting');
+                return false;
+            }
+            
+            // Check subject is selected
+            const subjectTypeValue = subjectType.value;
+            let subjectId = '';
+            
+            if (!subjectTypeValue) {
+                e.preventDefault();
+                alert('Please select subject type');
+                return false;
+            }
+            
+            if (subjectTypeValue === 'main') {
+                subjectId = mainSubjectSelect.value;
+                if (!subjectId) {
+                    e.preventDefault();
+                    alert('Please select a main subject');
+                    return false;
+                }
+            } else if (subjectTypeValue === 'elective') {
+                subjectId = electiveSubjectSelect.value;
+                if (!subjectId) {
+                    e.preventDefault();
+                    alert('Please select an elective subject');
+                    return false;
+                }
+            }
+            
+            // Ensure hidden fields are set properly
+            hiddenClassId.value = classIdValue;
+            hiddenSubjectId.value = subjectId;
+            
+            return true;
+        });
+    });
+</script>
+{% endblock %} 
